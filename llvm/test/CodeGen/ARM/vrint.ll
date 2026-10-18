@@ -599,20 +599,17 @@ define <8 x half> @frinti_8h(<8 x half> %A) nounwind {
 define <2 x float> @frinti_2s(<2 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frinti_2s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9}
-; CHECK-ARMV7-NEXT:    vmov.f64 d8, d0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s17
-; CHECK-ARMV7-NEXT:    bl nearbyintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s16
-; CHECK-ARMV7-NEXT:    bl nearbyintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f64 d0, d9
-; CHECK-ARMV7-NEXT:    vpop {d8, d9}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vorr d17, d0, d0
+; CHECK-ARMV7-NEXT:    vmov.i32 d16, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbic.i32 d17, #0x80000000
+; CHECK-ARMV7-NEXT:    vmvn.i32 d19, #0x80000000
+; CHECK-ARMV7-NEXT:    vadd.f32 d18, d17, d16
+; CHECK-ARMV7-NEXT:    vsub.f32 d18, d18, d16
+; CHECK-ARMV7-NEXT:    vcgt.u32 d16, d16, d17
+; CHECK-ARMV7-NEXT:    vorr d17, d19, d19
+; CHECK-ARMV7-NEXT:    vbsl d17, d18, d0
+; CHECK-ARMV7-NEXT:    vbit d0, d17, d16
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frinti_2s:
 ; CHECK:       @ %bb.0:
@@ -627,26 +624,17 @@ define <2 x float> @frinti_2s(<2 x float> %A) nounwind {
 define <4 x float> @frinti_4s(<4 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frinti_4s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vorr q5, q0, q0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s23
-; CHECK-ARMV7-NEXT:    bl nearbyintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s22
-; CHECK-ARMV7-NEXT:    bl nearbyintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s21
-; CHECK-ARMV7-NEXT:    bl nearbyintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s17, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s20
-; CHECK-ARMV7-NEXT:    bl nearbyintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s16, s0
-; CHECK-ARMV7-NEXT:    vorr q0, q4, q4
-; CHECK-ARMV7-NEXT:    vpop {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vorr q9, q0, q0
+; CHECK-ARMV7-NEXT:    vmov.i32 q8, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbic.i32 q9, #0x80000000
+; CHECK-ARMV7-NEXT:    vmvn.i32 q11, #0x80000000
+; CHECK-ARMV7-NEXT:    vadd.f32 q10, q9, q8
+; CHECK-ARMV7-NEXT:    vsub.f32 q10, q10, q8
+; CHECK-ARMV7-NEXT:    vcgt.u32 q8, q8, q9
+; CHECK-ARMV7-NEXT:    vorr q9, q11, q11
+; CHECK-ARMV7-NEXT:    vbsl q9, q10, q0
+; CHECK-ARMV7-NEXT:    vbit q0, q9, q8
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frinti_4s:
 ; CHECK:       @ %bb.0:
@@ -924,20 +912,22 @@ define <8 x half> @frintm_8h(<8 x half> %A) nounwind {
 define <2 x float> @frintm_2s(<2 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintm_2s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9}
-; CHECK-ARMV7-NEXT:    vmov.f64 d8, d0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s17
-; CHECK-ARMV7-NEXT:    bl floorf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s16
-; CHECK-ARMV7-NEXT:    bl floorf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f64 d0, d9
-; CHECK-ARMV7-NEXT:    vpop {d8, d9}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vcvt.s32.f32 d16, d0
+; CHECK-ARMV7-NEXT:    vclt.s32 d21, d0, #0
+; CHECK-ARMV7-NEXT:    vmvn.i32 d17, #0x80000000
+; CHECK-ARMV7-NEXT:    vorr d19, d0, d0
+; CHECK-ARMV7-NEXT:    vbic.i32 d19, #0x80000000
+; CHECK-ARMV7-NEXT:    vcvt.f32.s32 d16, d16
+; CHECK-ARMV7-NEXT:    vmov.i32 d20, #0x4b000000
+; CHECK-ARMV7-NEXT:    vcgt.u32 d19, d20, d19
+; CHECK-ARMV7-NEXT:    vbif d16, d0, d17
+; CHECK-ARMV7-NEXT:    vmov.f32 d17, #-1.000000e+00
+; CHECK-ARMV7-NEXT:    vceq.i32 d18, d16, d0
+; CHECK-ARMV7-NEXT:    vadd.f32 d17, d16, d17
+; CHECK-ARMV7-NEXT:    vbic d18, d21, d18
+; CHECK-ARMV7-NEXT:    vbit d16, d17, d18
+; CHECK-ARMV7-NEXT:    vbit d0, d16, d19
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintm_2s:
 ; CHECK:       @ %bb.0:
@@ -950,26 +940,22 @@ define <2 x float> @frintm_2s(<2 x float> %A) nounwind {
 define <4 x float> @frintm_4s(<4 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintm_4s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vorr q5, q0, q0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s23
-; CHECK-ARMV7-NEXT:    bl floorf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s22
-; CHECK-ARMV7-NEXT:    bl floorf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s21
-; CHECK-ARMV7-NEXT:    bl floorf
-; CHECK-ARMV7-NEXT:    vmov.f32 s17, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s20
-; CHECK-ARMV7-NEXT:    bl floorf
-; CHECK-ARMV7-NEXT:    vmov.f32 s16, s0
-; CHECK-ARMV7-NEXT:    vorr q0, q4, q4
-; CHECK-ARMV7-NEXT:    vpop {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vcvt.s32.f32 q8, q0
+; CHECK-ARMV7-NEXT:    vclt.s32 q13, q0, #0
+; CHECK-ARMV7-NEXT:    vmvn.i32 q9, #0x80000000
+; CHECK-ARMV7-NEXT:    vmov.f32 q10, #-1.000000e+00
+; CHECK-ARMV7-NEXT:    vorr q11, q0, q0
+; CHECK-ARMV7-NEXT:    vcvt.f32.s32 q8, q8
+; CHECK-ARMV7-NEXT:    vbic.i32 q11, #0x80000000
+; CHECK-ARMV7-NEXT:    vmov.i32 q12, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbif q8, q0, q9
+; CHECK-ARMV7-NEXT:    vcgt.u32 q11, q12, q11
+; CHECK-ARMV7-NEXT:    vadd.f32 q9, q8, q10
+; CHECK-ARMV7-NEXT:    vceq.i32 q10, q8, q0
+; CHECK-ARMV7-NEXT:    vbic q10, q13, q10
+; CHECK-ARMV7-NEXT:    vbit q8, q9, q10
+; CHECK-ARMV7-NEXT:    vbit q0, q8, q11
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintm_4s:
 ; CHECK:       @ %bb.0:
@@ -1243,20 +1229,17 @@ define <8 x half> @frintn_8h(<8 x half> %A) nounwind {
 define <2 x float> @frintn_2s(<2 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintn_2s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9}
-; CHECK-ARMV7-NEXT:    vmov.f64 d8, d0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s17
-; CHECK-ARMV7-NEXT:    bl roundevenf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s16
-; CHECK-ARMV7-NEXT:    bl roundevenf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f64 d0, d9
-; CHECK-ARMV7-NEXT:    vpop {d8, d9}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vorr d17, d0, d0
+; CHECK-ARMV7-NEXT:    vmov.i32 d16, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbic.i32 d17, #0x80000000
+; CHECK-ARMV7-NEXT:    vmvn.i32 d19, #0x80000000
+; CHECK-ARMV7-NEXT:    vadd.f32 d18, d17, d16
+; CHECK-ARMV7-NEXT:    vsub.f32 d18, d18, d16
+; CHECK-ARMV7-NEXT:    vcgt.u32 d16, d16, d17
+; CHECK-ARMV7-NEXT:    vorr d17, d19, d19
+; CHECK-ARMV7-NEXT:    vbsl d17, d18, d0
+; CHECK-ARMV7-NEXT:    vbit d0, d17, d16
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintn_2s:
 ; CHECK:       @ %bb.0:
@@ -1269,26 +1252,17 @@ define <2 x float> @frintn_2s(<2 x float> %A) nounwind {
 define <4 x float> @frintn_4s(<4 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintn_4s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vorr q5, q0, q0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s23
-; CHECK-ARMV7-NEXT:    bl roundevenf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s22
-; CHECK-ARMV7-NEXT:    bl roundevenf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s21
-; CHECK-ARMV7-NEXT:    bl roundevenf
-; CHECK-ARMV7-NEXT:    vmov.f32 s17, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s20
-; CHECK-ARMV7-NEXT:    bl roundevenf
-; CHECK-ARMV7-NEXT:    vmov.f32 s16, s0
-; CHECK-ARMV7-NEXT:    vorr q0, q4, q4
-; CHECK-ARMV7-NEXT:    vpop {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vorr q9, q0, q0
+; CHECK-ARMV7-NEXT:    vmov.i32 q8, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbic.i32 q9, #0x80000000
+; CHECK-ARMV7-NEXT:    vmvn.i32 q11, #0x80000000
+; CHECK-ARMV7-NEXT:    vadd.f32 q10, q9, q8
+; CHECK-ARMV7-NEXT:    vsub.f32 q10, q10, q8
+; CHECK-ARMV7-NEXT:    vcgt.u32 q8, q8, q9
+; CHECK-ARMV7-NEXT:    vorr q9, q11, q11
+; CHECK-ARMV7-NEXT:    vbsl q9, q10, q0
+; CHECK-ARMV7-NEXT:    vbit q0, q9, q8
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintn_4s:
 ; CHECK:       @ %bb.0:
@@ -1562,20 +1536,23 @@ define <8 x half> @frintp_8h(<8 x half> %A) nounwind {
 define <2 x float> @frintp_2s(<2 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintp_2s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9}
-; CHECK-ARMV7-NEXT:    vmov.f64 d8, d0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s17
-; CHECK-ARMV7-NEXT:    bl ceilf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s16
-; CHECK-ARMV7-NEXT:    bl ceilf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f64 d0, d9
-; CHECK-ARMV7-NEXT:    vpop {d8, d9}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vcvt.s32.f32 d16, d0
+; CHECK-ARMV7-NEXT:    vclt.s32 d21, d0, #0
+; CHECK-ARMV7-NEXT:    vmvn.i32 d17, #0x80000000
+; CHECK-ARMV7-NEXT:    vorr d19, d0, d0
+; CHECK-ARMV7-NEXT:    vbic.i32 d19, #0x80000000
+; CHECK-ARMV7-NEXT:    vcvt.f32.s32 d16, d16
+; CHECK-ARMV7-NEXT:    vmov.i32 d20, #0x4b000000
+; CHECK-ARMV7-NEXT:    vcgt.u32 d19, d20, d19
+; CHECK-ARMV7-NEXT:    vbif d16, d0, d17
+; CHECK-ARMV7-NEXT:    vmov.f32 d17, #1.000000e+00
+; CHECK-ARMV7-NEXT:    vceq.i32 d18, d16, d0
+; CHECK-ARMV7-NEXT:    vadd.f32 d17, d16, d17
+; CHECK-ARMV7-NEXT:    vmvn d18, d18
+; CHECK-ARMV7-NEXT:    vbic d18, d18, d21
+; CHECK-ARMV7-NEXT:    vbit d16, d17, d18
+; CHECK-ARMV7-NEXT:    vbit d0, d16, d19
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintp_2s:
 ; CHECK:       @ %bb.0:
@@ -1588,26 +1565,23 @@ define <2 x float> @frintp_2s(<2 x float> %A) nounwind {
 define <4 x float> @frintp_4s(<4 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintp_4s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vorr q5, q0, q0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s23
-; CHECK-ARMV7-NEXT:    bl ceilf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s22
-; CHECK-ARMV7-NEXT:    bl ceilf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s21
-; CHECK-ARMV7-NEXT:    bl ceilf
-; CHECK-ARMV7-NEXT:    vmov.f32 s17, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s20
-; CHECK-ARMV7-NEXT:    bl ceilf
-; CHECK-ARMV7-NEXT:    vmov.f32 s16, s0
-; CHECK-ARMV7-NEXT:    vorr q0, q4, q4
-; CHECK-ARMV7-NEXT:    vpop {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vcvt.s32.f32 q8, q0
+; CHECK-ARMV7-NEXT:    vclt.s32 q13, q0, #0
+; CHECK-ARMV7-NEXT:    vmvn.i32 q9, #0x80000000
+; CHECK-ARMV7-NEXT:    vorr q11, q0, q0
+; CHECK-ARMV7-NEXT:    vbic.i32 q11, #0x80000000
+; CHECK-ARMV7-NEXT:    vcvt.f32.s32 q8, q8
+; CHECK-ARMV7-NEXT:    vmov.i32 q12, #0x4b000000
+; CHECK-ARMV7-NEXT:    vcgt.u32 q11, q12, q11
+; CHECK-ARMV7-NEXT:    vbif q8, q0, q9
+; CHECK-ARMV7-NEXT:    vmov.f32 q9, #1.000000e+00
+; CHECK-ARMV7-NEXT:    vceq.i32 q10, q8, q0
+; CHECK-ARMV7-NEXT:    vadd.f32 q9, q8, q9
+; CHECK-ARMV7-NEXT:    vmvn q10, q10
+; CHECK-ARMV7-NEXT:    vbic q10, q10, q13
+; CHECK-ARMV7-NEXT:    vbit q8, q9, q10
+; CHECK-ARMV7-NEXT:    vbit q0, q8, q11
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintp_4s:
 ; CHECK:       @ %bb.0:
@@ -1881,20 +1855,17 @@ define <8 x half> @frintx_8h(<8 x half> %A) nounwind {
 define <2 x float> @frintx_2s(<2 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintx_2s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9}
-; CHECK-ARMV7-NEXT:    vmov.f64 d8, d0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s17
-; CHECK-ARMV7-NEXT:    bl rintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s16
-; CHECK-ARMV7-NEXT:    bl rintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f64 d0, d9
-; CHECK-ARMV7-NEXT:    vpop {d8, d9}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vorr d17, d0, d0
+; CHECK-ARMV7-NEXT:    vmov.i32 d16, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbic.i32 d17, #0x80000000
+; CHECK-ARMV7-NEXT:    vmvn.i32 d19, #0x80000000
+; CHECK-ARMV7-NEXT:    vadd.f32 d18, d17, d16
+; CHECK-ARMV7-NEXT:    vsub.f32 d18, d18, d16
+; CHECK-ARMV7-NEXT:    vcgt.u32 d16, d16, d17
+; CHECK-ARMV7-NEXT:    vorr d17, d19, d19
+; CHECK-ARMV7-NEXT:    vbsl d17, d18, d0
+; CHECK-ARMV7-NEXT:    vbit d0, d17, d16
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintx_2s:
 ; CHECK:       @ %bb.0:
@@ -1907,26 +1878,17 @@ define <2 x float> @frintx_2s(<2 x float> %A) nounwind {
 define <4 x float> @frintx_4s(<4 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintx_4s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vorr q5, q0, q0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s23
-; CHECK-ARMV7-NEXT:    bl rintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s22
-; CHECK-ARMV7-NEXT:    bl rintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s21
-; CHECK-ARMV7-NEXT:    bl rintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s17, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s20
-; CHECK-ARMV7-NEXT:    bl rintf
-; CHECK-ARMV7-NEXT:    vmov.f32 s16, s0
-; CHECK-ARMV7-NEXT:    vorr q0, q4, q4
-; CHECK-ARMV7-NEXT:    vpop {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vorr q9, q0, q0
+; CHECK-ARMV7-NEXT:    vmov.i32 q8, #0x4b000000
+; CHECK-ARMV7-NEXT:    vbic.i32 q9, #0x80000000
+; CHECK-ARMV7-NEXT:    vmvn.i32 q11, #0x80000000
+; CHECK-ARMV7-NEXT:    vadd.f32 q10, q9, q8
+; CHECK-ARMV7-NEXT:    vsub.f32 q10, q10, q8
+; CHECK-ARMV7-NEXT:    vcgt.u32 q8, q8, q9
+; CHECK-ARMV7-NEXT:    vorr q9, q11, q11
+; CHECK-ARMV7-NEXT:    vbsl q9, q10, q0
+; CHECK-ARMV7-NEXT:    vbit q0, q9, q8
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintx_4s:
 ; CHECK:       @ %bb.0:
@@ -2200,20 +2162,16 @@ define <8 x half> @frintz_8h(<8 x half> %A) nounwind {
 define <2 x float> @frintz_2s(<2 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintz_2s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9}
-; CHECK-ARMV7-NEXT:    vmov.f64 d8, d0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s17
-; CHECK-ARMV7-NEXT:    bl truncf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s16
-; CHECK-ARMV7-NEXT:    bl truncf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f64 d0, d9
-; CHECK-ARMV7-NEXT:    vpop {d8, d9}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vcvt.s32.f32 d16, d0
+; CHECK-ARMV7-NEXT:    vorr d17, d0, d0
+; CHECK-ARMV7-NEXT:    vbic.i32 d17, #0x80000000
+; CHECK-ARMV7-NEXT:    vmov.i32 d18, #0x4b000000
+; CHECK-ARMV7-NEXT:    vcvt.f32.s32 d16, d16
+; CHECK-ARMV7-NEXT:    vmvn.i32 d19, #0x80000000
+; CHECK-ARMV7-NEXT:    vcgt.u32 d17, d18, d17
+; CHECK-ARMV7-NEXT:    vbif d16, d0, d19
+; CHECK-ARMV7-NEXT:    vbit d0, d16, d17
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintz_2s:
 ; CHECK:       @ %bb.0:
@@ -2226,26 +2184,16 @@ define <2 x float> @frintz_2s(<2 x float> %A) nounwind {
 define <4 x float> @frintz_4s(<4 x float> %A) nounwind {
 ; CHECK-ARMV7-LABEL: frintz_4s:
 ; CHECK-ARMV7:       @ %bb.0:
-; CHECK-ARMV7-NEXT:    .save {r11, lr}
-; CHECK-ARMV7-NEXT:    push {r11, lr}
-; CHECK-ARMV7-NEXT:    .vsave {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vpush {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    vorr q5, q0, q0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s23
-; CHECK-ARMV7-NEXT:    bl truncf
-; CHECK-ARMV7-NEXT:    vmov.f32 s19, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s22
-; CHECK-ARMV7-NEXT:    bl truncf
-; CHECK-ARMV7-NEXT:    vmov.f32 s18, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s21
-; CHECK-ARMV7-NEXT:    bl truncf
-; CHECK-ARMV7-NEXT:    vmov.f32 s17, s0
-; CHECK-ARMV7-NEXT:    vmov.f32 s0, s20
-; CHECK-ARMV7-NEXT:    bl truncf
-; CHECK-ARMV7-NEXT:    vmov.f32 s16, s0
-; CHECK-ARMV7-NEXT:    vorr q0, q4, q4
-; CHECK-ARMV7-NEXT:    vpop {d8, d9, d10, d11}
-; CHECK-ARMV7-NEXT:    pop {r11, pc}
+; CHECK-ARMV7-NEXT:    vcvt.s32.f32 q8, q0
+; CHECK-ARMV7-NEXT:    vorr q9, q0, q0
+; CHECK-ARMV7-NEXT:    vbic.i32 q9, #0x80000000
+; CHECK-ARMV7-NEXT:    vmov.i32 q10, #0x4b000000
+; CHECK-ARMV7-NEXT:    vcvt.f32.s32 q8, q8
+; CHECK-ARMV7-NEXT:    vmvn.i32 q11, #0x80000000
+; CHECK-ARMV7-NEXT:    vcgt.u32 q9, q10, q9
+; CHECK-ARMV7-NEXT:    vbif q8, q0, q11
+; CHECK-ARMV7-NEXT:    vbit q0, q8, q9
+; CHECK-ARMV7-NEXT:    bx lr
 ;
 ; CHECK-LABEL: frintz_4s:
 ; CHECK:       @ %bb.0:

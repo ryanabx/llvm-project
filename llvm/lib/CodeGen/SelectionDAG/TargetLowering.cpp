@@ -10540,6 +10540,95 @@ static SDValue isSpecificZeroAfterMaybeRounding(SelectionDAG &DAG,
   return DAG.getNode(ISD::IS_FPCLASS, DL, CCVT, Val, TestZero);
 }
 
+SDValue TargetLowering::expandVectorFRound(SDNode *N, SelectionDAG &DAG) const {
+  unsigned Opc = N->getOpcode();
+  SDLoc DL(N);
+  EVT VT = N->getValueType(0);
+  assert(VT.isVector() && "Expected a vector type");
+  EVT IntVT = VT.changeVectorElementTypeToInteger();
+  EVT CCVT = getSetCCResultType(DAG.getDataLayout(), *DAG.getContext(), IntVT);
+  bool IsTruncating =
+      Opc == ISD::FTRUNC || Opc == ISD::FFLOOR || Opc == ISD::FCEIL;
+
+  // The selects can also be expanded to AND, OR and XOR by the legalizer.
+  bool CanSelect = isOperationLegalOrCustom(ISD::VSELECT, VT) ||
+                   (getBooleanContents(VT) == ZeroOrNegativeOneBooleanContent &&
+                    CCVT.getSizeInBits() == VT.getSizeInBits() &&
+                    isOperationLegalOrCustom(ISD::XOR, CCVT));
+  if (!CanSelect || !isOperationLegalOrCustom(ISD::SETCC, IntVT) ||
+      !isOperationLegalOrCustom(ISD::AND, IntVT) ||
+      !isOperationLegalOrCustom(ISD::OR, IntVT))
+    return SDValue();
+  if (IsTruncating && (!isOperationLegalOrCustom(ISD::FP_TO_SINT, IntVT) ||
+                       !isOperationLegalOrCustom(ISD::SINT_TO_FP, IntVT)))
+    return SDValue();
+  if (!isOperationLegalOrCustom(ISD::FADD, VT) ||
+      (!IsTruncating && !isOperationLegalOrCustom(ISD::FSUB, VT)))
+    return SDValue();
+
+  const fltSemantics &Sem = VT.getScalarType().getFltSemantics();
+  unsigned BitWidth = VT.getScalarSizeInBits();
+  APInt SignMask = APInt::getSignMask(BitWidth);
+
+  // Values with a magnitude of 2^(precision - 1) or more have no fraction
+  // bits; neither do infinities, and NaNs stay as they are. Compare the bit
+  // patterns as integers, so that this also holds where the target flushes
+  // denormals to zero in floating-point compares.
+  APFloat MaxVal(Sem);
+  unsigned Precision = APFloat::semanticsPrecision(Sem);
+  MaxVal.convertFromAPInt(APInt::getOneBitSet(Precision, Precision - 1),
+                          /*IsSigned=*/false, APFloat::rmNearestTiesToEven);
+
+  SDValue Src = DAG.getFreeze(N->getOperand(0));
+  SDValue SrcInt = DAG.getBitcast(IntVT, Src);
+  SDValue SignBit = DAG.getNode(ISD::AND, DL, IntVT, SrcInt,
+                                DAG.getConstant(SignMask, DL, IntVT));
+  SDValue AbsInt = DAG.getNode(ISD::AND, DL, IntVT, SrcInt,
+                               DAG.getConstant(~SignMask, DL, IntVT));
+  SDValue NeedsRounding = DAG.getSetCC(
+      DL, CCVT, AbsInt, DAG.getConstant(MaxVal.bitcastToAPInt(), DL, IntVT),
+      ISD::SETULT);
+
+  SDValue Rounded;
+  if (IsTruncating) {
+    // Round toward zero through the integer domain; the conversion is exact
+    // for all values below MaxVal.
+    Rounded = DAG.getNode(ISD::SINT_TO_FP, DL, VT,
+                          DAG.getNode(ISD::FP_TO_SINT, DL, IntVT, Src));
+  } else {
+    // Adding and subtracting MaxVal leaves no fraction bits; the addition
+    // rounds to nearest, ties to even.
+    SDValue Max = DAG.getConstantFP(MaxVal, DL, VT);
+    Rounded = DAG.getNode(
+        ISD::FSUB, DL, VT,
+        DAG.getNode(ISD::FADD, DL, VT, DAG.getBitcast(VT, AbsInt), Max), Max);
+  }
+
+  // Restore the sign, so that values rounded to zero keep it.
+  SDValue RoundedInt = DAG.getNode(
+      ISD::OR, DL, IntVT,
+      DAG.getNode(ISD::AND, DL, IntVT, DAG.getBitcast(IntVT, Rounded),
+                  DAG.getConstant(~SignMask, DL, IntVT)),
+      SignBit);
+  Rounded = DAG.getBitcast(VT, RoundedInt);
+
+  if (Opc == ISD::FFLOOR || Opc == ISD::FCEIL) {
+    // Step away from zero by one where truncation dropped a fraction: below
+    // zero for floor, above zero for ceil.
+    SDValue Inexact = DAG.getSetCC(DL, CCVT, RoundedInt, SrcInt, ISD::SETNE);
+    SDValue Negative = DAG.getSetCC(DL, CCVT, SrcInt,
+                                    DAG.getConstant(0, DL, IntVT), ISD::SETLT);
+    if (Opc == ISD::FCEIL)
+      Negative = DAG.getLogicalNOT(DL, Negative, CCVT);
+    SDValue Adjust = DAG.getNode(ISD::AND, DL, CCVT, Inexact, Negative);
+    SDValue One = DAG.getConstantFP(Opc == ISD::FFLOOR ? -1.0 : 1.0, DL, VT);
+    Rounded = DAG.getSelect(
+        DL, VT, Adjust, DAG.getNode(ISD::FADD, DL, VT, Rounded, One), Rounded);
+  }
+
+  return DAG.getSelect(DL, VT, NeedsRounding, Rounded, Src);
+}
+
 SDValue TargetLowering::expandFMINIMUM_FMAXIMUM(SDNode *N,
                                                 SelectionDAG &DAG) const {
   if (SDValue Expanded = expandVectorNaryOpBySplitting(N, DAG))

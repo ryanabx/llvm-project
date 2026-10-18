@@ -339,18 +339,9 @@ define void @test_floor(ptr %X) nounwind {
 ; CHECK:      movt  [[reg0]], :upper16:{{.*}}
 ; CHECK:      vld1.64
 
-; CHECK:      {{v?mov(.32)?}}  r0,
-; CHECK:      bl  {{.*}}floorf
-
-; CHECK:      {{v?mov(.32)?}}  r0,
-; CHECK:      bl  {{.*}}floorf
-
-; CHECK:      {{v?mov(.32)?}}  r0,
-; CHECK:      bl  {{.*}}floorf
-
-; CHECK:      {{v?mov(.32)?}}  r0,
-; CHECK:      bl  {{.*}}floorf
-
+; CHECK:      vcvt.s32.f32
+; CHECK:      vcvt.f32.s32
+; CHECK-NOT:  floorf
 ; CHECK:      vst1.64
 
 L.entry:

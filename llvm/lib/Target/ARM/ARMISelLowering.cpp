@@ -723,6 +723,12 @@ ARMTargetLowering::ARMTargetLowering(const TargetMachine &TM_,
                               ISD::FRINT, ISD::FTRUNC, ISD::FROUNDEVEN}) {
       setOperationAction(Op, MVT::v4f16, Expand);
       setOperationAction(Op, MVT::v8f16, Expand);
+      // Without VRINT, round in the vector registers rather than with one
+      // libcall per element.
+      if (!Subtarget->hasV8Ops()) {
+        setOperationAction(Op, MVT::v2f32, Custom);
+        setOperationAction(Op, MVT::v4f32, Custom);
+      }
     }
 
     // Neon does not support some operations on v1i64 and v2i64 types.
@@ -10335,6 +10341,13 @@ SDValue ARMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::FP_TO_SINT_SAT:
   case ISD::FP_TO_UINT_SAT: return LowerFP_TO_INT_SAT(Op, DAG, Subtarget);
   case ISD::FCOPYSIGN:     return LowerFCOPYSIGN(Op, DAG);
+  case ISD::FFLOOR:
+  case ISD::FCEIL:
+  case ISD::FTRUNC:
+  case ISD::FROUNDEVEN:
+  case ISD::FRINT:
+  case ISD::FNEARBYINT:
+    return expandVectorFRound(Op.getNode(), DAG);
   case ISD::RETURNADDR:    return LowerRETURNADDR(Op, DAG);
   case ISD::FRAMEADDR:     return LowerFRAMEADDR(Op, DAG);
   case ISD::EH_SJLJ_SETJMP: return LowerEH_SJLJ_SETJMP(Op, DAG);

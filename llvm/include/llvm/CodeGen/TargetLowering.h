@@ -5804,6 +5804,12 @@ public:
   /// Expand fminnum/fmaxnum into fminnum_ieee/fmaxnum_ieee with quieted inputs.
   SDValue expandFMINNUM_FMAXNUM(SDNode *N, SelectionDAG &DAG) const;
 
+  /// Expand a vector FTRUNC, FFLOOR, FCEIL, FROUNDEVEN, FRINT or FNEARBYINT
+  /// with integer conversions, integer compares and selects, for targets
+  /// without vector rounding instructions. Assumes the default rounding mode.
+  /// Returns SDValue() if the target lacks the operations needed.
+  SDValue expandVectorFRound(SDNode *N, SelectionDAG &DAG) const;
+
   /// Expand fminimum/fmaximum into multiple comparison with selects.
   SDValue expandFMINIMUM_FMAXIMUM(SDNode *N, SelectionDAG &DAG) const;
 

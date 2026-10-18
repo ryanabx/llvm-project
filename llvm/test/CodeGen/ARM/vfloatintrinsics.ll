@@ -85,31 +85,41 @@ define %v2f32 @test_v2f32.fabs(%v2f32 %a) {
 }
 ; CHECK-LABEL: test_v2f32.floor:{{.*}}
 define %v2f32 @test_v2f32.floor(%v2f32 %a) {
-  ; CHECK: _floorf
+  ; CHECK: vcvt.s32.f32
+  ; CHECK: vcvt.f32.s32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v2f32 @llvm.floor.v2f32(%v2f32 %a)
   ret %v2f32 %1
 }
 ; CHECK-LABEL: test_v2f32.ceil:{{.*}}
 define %v2f32 @test_v2f32.ceil(%v2f32 %a) {
-  ; CHECK: _ceilf
+  ; CHECK: vcvt.s32.f32
+  ; CHECK: vcvt.f32.s32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v2f32 @llvm.ceil.v2f32(%v2f32 %a)
   ret %v2f32 %1
 }
 ; CHECK-LABEL: test_v2f32.trunc:{{.*}}
 define %v2f32 @test_v2f32.trunc(%v2f32 %a) {
-  ; CHECK: trunc
+  ; CHECK: vcvt.s32.f32
+  ; CHECK: vcvt.f32.s32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v2f32 @llvm.trunc.v2f32(%v2f32 %a)
   ret %v2f32 %1
 }
 ; CHECK-LABEL: test_v2f32.rint:{{.*}}
 define %v2f32 @test_v2f32.rint(%v2f32 %a) {
-  ; CHECK: rint
+  ; CHECK: vadd.f32
+  ; CHECK: vsub.f32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v2f32 @llvm.rint.v2f32(%v2f32 %a)
   ret %v2f32 %1
 }
 ; CHECK-LABEL: test_v2f32.nearbyint:{{.*}}
 define %v2f32 @test_v2f32.nearbyint(%v2f32 %a) {
-  ; CHECK: nearbyint
+  ; CHECK: vadd.f32
+  ; CHECK: vsub.f32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v2f32 @llvm.nearbyint.v2f32(%v2f32 %a)
   ret %v2f32 %1
 }
@@ -216,31 +226,41 @@ define %v4f32 @test_v4f32.fabs(%v4f32 %a) {
 }
 ; CHECK-LABEL: test_v4f32.floor:{{.*}}
 define %v4f32 @test_v4f32.floor(%v4f32 %a) {
-  ; CHECK: floor
+  ; CHECK: vcvt.s32.f32
+  ; CHECK: vcvt.f32.s32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v4f32 @llvm.floor.v4f32(%v4f32 %a)
   ret %v4f32 %1
 }
 ; CHECK-LABEL: test_v4f32.ceil:{{.*}}
 define %v4f32 @test_v4f32.ceil(%v4f32 %a) {
-  ; CHECK: _ceil
+  ; CHECK: vcvt.s32.f32
+  ; CHECK: vcvt.f32.s32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v4f32 @llvm.ceil.v4f32(%v4f32 %a)
   ret %v4f32 %1
 }
 ; CHECK-LABEL: test_v4f32.trunc:{{.*}}
 define %v4f32 @test_v4f32.trunc(%v4f32 %a) {
-  ; CHECK: trunc
+  ; CHECK: vcvt.s32.f32
+  ; CHECK: vcvt.f32.s32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v4f32 @llvm.trunc.v4f32(%v4f32 %a)
   ret %v4f32 %1
 }
 ; CHECK-LABEL: test_v4f32.rint:{{.*}}
 define %v4f32 @test_v4f32.rint(%v4f32 %a) {
-  ; CHECK: rint
+  ; CHECK: vadd.f32
+  ; CHECK: vsub.f32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v4f32 @llvm.rint.v4f32(%v4f32 %a)
   ret %v4f32 %1
 }
 ; CHECK-LABEL: test_v4f32.nearbyint:{{.*}}
 define %v4f32 @test_v4f32.nearbyint(%v4f32 %a) {
-  ; CHECK: nearbyint
+  ; CHECK: vadd.f32
+  ; CHECK: vsub.f32
+  ; CHECK-NOT: {{[[:space:]]bl[[:space:]]}}
   %1 = call %v4f32 @llvm.nearbyint.v4f32(%v4f32 %a)
   ret %v4f32 %1
 }
